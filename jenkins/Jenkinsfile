@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "ghcr.io/biplobgiri/linkscope"
+        IMAGE_NAME = "linkscope"
+    }
+
+    stages {
+        stage("Checkout") {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage("Test") {
+            steps {
+                sh """
+                    docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        python:3.12-slim \
+                        sh -c "pip install -r requirements.txt && pytest app/tests/ -v"
+                """
+            }
+        }
+
+        stage("Build") {
+            steps {
+                sh "docker build -t ${REGISTRY}:${BUILD_NUMBER} -t ${REGISTRY}:latest ."
+            }
+        }
+
+        stage("Push") {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "github-registry",
+                    usernameVariable: "REGISTRY_USER",
+                    passwordVariable: "REGISTRY_PASS"
+                )]) {
+                    sh """
+                        echo \$REGISTRY_PASS | docker login ghcr.io -u \$REGISTRY_USER --password-stdin
+                        docker push ${REGISTRY}:${BUILD_NUMBER}
+                        docker push ${REGISTRY}:latest
+                    """
+                }
+            }
+        }
+
+        stage("Load Test") {
+            steps {
+                sh """
+                    docker run --rm \
+                        -v \$(pwd)/k6:/scripts \
+                        grafana/k6 run /scripts/load_test.js \
+                        --vus 10 --duration 30s
+                """
+            }
+            post {
+                failure {
+                    error "Load test failed — p95 latency threshold breached"
+                }
+            }
+        }
+
+        stage("Deploy") {
+            steps {
+                sh "ansible-playbook -i infra/ansible/inventory.ini infra/ansible/playbook.yml"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
+    }
+}

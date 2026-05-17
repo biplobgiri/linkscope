@@ -1,0 +1,81 @@
+---
+- name: Deploy LinkScope
+  hosts: linkscope
+  become: true
+
+  vars:
+    app_dir: /opt/linkscope
+    registry: ghcr.io/biplobgiri/linkscope
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: ../../docker-compose.yml
+        dest: "{{ app_dir }}/docker-compose.yml"
+
+    - name: Copy .env file
+      copy:
+        src: ../../.env
+        dest: "{{ app_dir }}/.env"
+        mode: "0600"
+
+    - name: Copy monitoring config
+      copy:
+        src: ../../monitoring/
+        dest: "{{ app_dir }}/monitoring/"
+
+    - name: Log in to GitHub container registry
+      command: >
+        docker login ghcr.io
+        -u {{ lookup('env', 'GITHUB_ACTOR') }}
+        -p {{ lookup('env', 'GITHUB_TOKEN') }}
+
+    - name: Pull latest image
+      command: docker pull {{ registry }}:latest
+
+    - name: Run DB migrations
+      command: >
+        docker run --rm
+        --env-file {{ app_dir }}/.env
+        {{ registry }}:latest
+        alembic upgrade head
+
+    - name: Deploy with docker-compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        pull: always
+        state: present
+
+    - name: Health check
+      uri:
+        url: http://localhost:8000/health
+        method: GET
+        status_code: 200
+        retries: 5
+        delay: 5
+      register: health
+
+    - name: Confirm deployment
+      debug:
+        msg: "LinkScope is up — {{ health.json.status }}"
