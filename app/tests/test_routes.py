@@ -133,10 +133,10 @@ def test_stats_unknown_slug():
 def test_stats_summary():
     client.post("/shorten", json={
         "original_url": "https://example.com",
-        "custom_slug": "summary"
+        "custom_slug": "testslug"
     })
 
-    response = client.get("/stats/summary/summary")
+    response = client.get("/stats/testslug/summary")
     assert response.status_code == 200
     data = response.json()
     assert "total_clicks" in data
