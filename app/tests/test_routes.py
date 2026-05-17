@@ -43,7 +43,7 @@ def test_shorten_valid_url():
     data = response.json()
     assert "slug" in data
     assert "short_url" in data
-    assert data["original_url"] == "https://example.com/"
+    assert data["original_url"] == "https://example.com"
 
 
 def test_shorten_custom_slug():
@@ -85,7 +85,7 @@ def test_redirect_valid_slug():
 
     response = client.get(f"/r/{slug}", follow_redirects=False)
     assert response.status_code == 301
-    assert response.headers["location"] == "https://example.com/"
+    assert response.headers["location"] == "https://example.com"
 
 
 def test_redirect_unknown_slug():
