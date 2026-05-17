@@ -16,6 +16,11 @@ export default function App() {
     setResult(null);
     setLoading(true);
 
+    let url=longUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")){
+      url="http://"+url;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/shorten`, {
         original_url: longUrl,

@@ -1,12 +1,27 @@
-from pydantic import BaseModel, HttpUrl, ConfigDict
+from pydantic import BaseModel, HttpUrl, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlparse
 
 class ShortenRequest(BaseModel):
-    original_url: HttpUrl
+    original_url: str
     custom_slug: Optional[str] = None
     max_clicks: Optional[int] = None
     expires_at: Optional[datetime] = None
+
+    @field_validator("original_url")
+    @classmethod
+    def validate_url(cls,v):
+        if not v or not v.strip():
+            raise ValueError("URL cannot be empty")
+        if not v.startswith("http://") and not v.startswith("https://"):
+            v="http://"+v
+        parsed = urlparse(v)
+        if not parsed.netloc or "." not in parsed.netloc:
+            raise ValueError("URL is invalid")
+        return v
+
+
 
 class ShortenResponse(BaseModel):
     slug: str
@@ -15,6 +30,8 @@ class ShortenResponse(BaseModel):
     expires_at: Optional[datetime] = None
     max_clicks: Optional[int] = None
 
+
+     
 class ClickResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
