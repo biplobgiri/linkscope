@@ -12,7 +12,7 @@ class ShortenRequest(BaseModel):
     @classmethod
     def validate_url(cls,v):
         if not v.startswith("http://") and not v.startswith("https://"):
-            v="https://"+v
+            v="http://"+v
         return v
 
 
