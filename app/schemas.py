@@ -1,6 +1,7 @@
 from pydantic import BaseModel, HttpUrl, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlparse
 
 class ShortenRequest(BaseModel):
     original_url: str
@@ -15,6 +16,9 @@ class ShortenRequest(BaseModel):
             raise ValueError("URL cannot be empty")
         if not v.startswith("http://") and not v.startswith("https://"):
             v="http://"+v
+        parsed = urlparse(v)
+        if not parsed.netloc or "." not in parsed.netloc:
+            raise ValueError("URL is invalid")
         return v
 
 
