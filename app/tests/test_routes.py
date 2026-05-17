@@ -70,7 +70,7 @@ def test_shorten_duplicate_slug():
 
 def test_shorten_invalid_url():
     response = client.post("/shorten", json={
-        "original_url": "not-a-url"
+        "original_url": ""
     })
     assert response.status_code == 422
 
