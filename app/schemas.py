@@ -11,6 +11,8 @@ class ShortenRequest(BaseModel):
     @field_validator("original_url")
     @classmethod
     def validate_url(cls,v):
+        if not v or not v.strip():
+            raise ValueError("URL cannot be empty")
         if not v.startswith("http://") and not v.startswith("https://"):
             v="http://"+v
         return v
