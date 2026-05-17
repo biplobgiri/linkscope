@@ -32,7 +32,7 @@ async def get_stats_summary( slug:str,db:Session=Depends(get_db)):
 
     link=db.query(Link).filter(Link.slug==slug).first()
 
-    if not Link:
+    if not link:
         raise HTTPException(status_code=404, detail="Link not found")
     
     clicks=db.query(Click).filter(Click.link_id==link.id).all()
@@ -45,7 +45,7 @@ async def get_stats_summary( slug:str,db:Session=Depends(get_db)):
         "slug": link.slug,
         "total_clicks":len(clicks),
         "top_countries":countries.most_common(5),
-        "top_referrrers":referrers.most_common(5),
+        "top_referrers":referrers.most_common(5),
         "top_browsers":browsers.most_common(5),
         "clicks_remaining":(link.max_clicks-len(clicks)) if link.max_clicks else None
     }
