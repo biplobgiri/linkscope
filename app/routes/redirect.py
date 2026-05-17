@@ -31,7 +31,7 @@ async def redirect_url(
 
     link=db.query(Link).filter(Link.slug==slug).first()
 
-    if not Link:
+    if not link:
         redirect_latency.observe(time.time()-start)
         return RedirectResponse(url="/not-found",status_code=302)
     
