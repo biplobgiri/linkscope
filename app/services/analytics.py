@@ -12,7 +12,7 @@ async def log_click(
 ):
     country = await get_country_from_ip(ip)
     
-    click=Clicks(
+    click=Click(
         link_id=link.id,
         ip=ip,
         user_agent=user_agent,
