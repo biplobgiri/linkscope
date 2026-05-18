@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
   
   jenkins:
-    image: jenkins/jenkins:lts
+    build: jenkins/jenkins:lts
     ports:
       - "8080:8080"
       - "50000:50000"
