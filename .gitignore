@@ -59,3 +59,7 @@ k6/results/
 monitoring/grafana/grafana.db
 
 devops_checkpoints.md
+
+# Kubernetes
+k8s/app/secret.ymlkubectl
+minikube-linux-amd64

@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard
+  namespace: linkscope
+data:
+  dashboard.json: |
+    {
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requests per second",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{method}} {{handler}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "p50 / p95 / p99 Redirect Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(linkscope_redirect_latency_seconds_bucket[5m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(linkscope_redirect_latency_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(linkscope_redirect_latency_seconds_bucket[5m]))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Total clicks today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(increase(linkscope_total_clicks_total[24h]))",
+          "legendFormat": "Clicks"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Active links",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "linkscope_active_links",
+          "legendFormat": "Active Links"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Links created today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "increase(linkscope_links_created_total[24h])",
+          "legendFormat": "Links Created"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Expired link hits",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "expr": "increase(linkscope_expired_link_hits_total[24h])",
+          "legendFormat": "Expired Hits"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Error rate (4xx + 5xx)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status=~\"4..|5..\"}[5m])",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Redis cache hit/miss ratio",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(linkscope_cache_hits_total[5m])",
+          "legendFormat": "Cache Hits"
+        },
+        {
+          "expr": "rate(linkscope_cache_misses_total[5m])",
+          "legendFormat": "Cache Misses"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Top 5 slugs by clicks",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "topk(5, sum by(slug) (linkscope_total_clicks_total))",
+          "legendFormat": "{{slug}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["linkscope"],
+  "title": "LinkScope Dashboard",
+  "uid": "linkscope-main",
+  "version": 1
+}

@@ -14,7 +14,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "85:80"
     depends_on:
       - app
     restart: unless-stopped
@@ -29,6 +29,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    restart: unless-stopped
+  
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    # group_add :
+    #   - "${DOCKER_GID -999}"
     restart: unless-stopped
 
   redis:
@@ -61,3 +73,4 @@ services:
 volumes:
   postgres_data:
   grafana_data:
+  jenkins_data:
