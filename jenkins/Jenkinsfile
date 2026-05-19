@@ -65,7 +65,13 @@ pipeline {
 
         stage("Deploy") {
             steps {
-                sh "ansible-playbook -i infra/ansible/inventory.ini infra/ansible/playbook.yml"
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-registry',
+                    usernameVariable: 'GITHUB_ACTOR',
+                    passwordVariable: 'GITHUB_TOKEN'
+                )]) {
+                    sh "ansible-playbook -i infra/ansible/inventory.ini infra/ansible/playbook.yml"
+                }
             }
         }
     }
