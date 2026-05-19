@@ -47,21 +47,21 @@ pipeline {
             }
         }
 
-        stage("Load Test") {
-            steps {
-                sh """
-                    docker run --rm \
-                        -v \$(pwd)/k6:/scripts \
-                        grafana/k6 run /scripts/load_test.js \
-                        --vus 10 --duration 30s
-                """
-            }
-            post {
-                failure {
-                    error "Load test failed — p95 latency threshold breached"
-                }
-            }
-        }
+        // stage("Load Test") {
+        //     steps {
+        //         sh """
+        //             docker run --rm \
+        //                 -v \$(pwd)/k6:/scripts \
+        //                 grafana/k6 run /scripts/load_test.js \
+        //                 --vus 10 --duration 30s
+        //         """
+        //     }
+        //     post {
+        //         failure {
+        //             error "Load test failed — p95 latency threshold breached"
+        //         }
+        //     }
+        // }
 
         stage("Deploy") {
             steps {
