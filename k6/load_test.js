@@ -9,7 +9,7 @@ export const options={
 };
 
 export default function(){
-    const base ="http://app:8080";
+    const base ="http://localhost:8000";
 
     const shortenRes = http.post(
         `${base}/shorten`,

@@ -58,4 +58,5 @@ k6/results/
 # Grafana
 monitoring/grafana/grafana.db
 
-devops_checkpoints.mdminikube-linux-amd64
+devops_checkpoints.md
+minikube-linux-amd64
